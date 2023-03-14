@@ -1,10 +1,60 @@
 'use strict';
 
 const EmberApp = require('ember-cli/lib/broccoli/ember-app');
+const environment = EmberApp.env();
+const IS_PROD = environment === 'production';
 
 module.exports = function (defaults) {
-  let app = new EmberApp(defaults, {
-    // Add options here
+  const app = new EmberApp(defaults, {
+    sourcemaps: {
+      enabled: IS_PROD,
+      extensions: ['js'],
+    },
+
+    'ember-cli-babel': {
+      includePolyfill: IS_PROD,
+    },
+
+    fingerprint: {
+      extensions: ['js', 'css', 'png', 'jpg', 'gif', 'map', 'svg'],
+      generateAssetMap: true,
+      fingerprintAssetMap: true,
+      inline: true,
+      enabled: IS_PROD,
+      prepend: IS_PROD ? `${process.env.URL}/` : '/',
+    },
+
+    autoImport: {
+      forbidEval: true,
+      webpack: {
+        node: {
+          global: false,
+          __filename: false,
+          __dirname: false,
+        },
+        module: {
+          rules: [
+            {
+              test: /\.m?js/,
+              resolve: {
+                fullySpecified: false,
+              },
+            },
+          ],
+        },
+      },
+      pubicAssetURL: IS_PROD ? `${process.env.URL}/assets` : undefined,
+    },
+
+    'ember-bootstrap': {
+      bootstrapVersion: 5,
+      importBootstrapFont: false,
+      importBootstrapCSS: false,
+    },
+
+    emberApolloClient: {
+      keepGraphqlFileExtension: false,
+    },
   });
 
   // Use `app.import` to add additional libraries to the generated
